@@ -1,0 +1,27 @@
+{
+  "name": "solproject",
+  "version": "1.0.0",
+  "description": "sol starting project",
+  "main": "main.js",
+  "scripts": {
+    "test": "start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ThatGuyThimo/solproject.git"
+  },
+  "keywords": [
+    "sol",
+    "solidity"
+  ],
+  "author": "Thimo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ThatGuyThimo/solproject/issues"
+  },
+  "homepage": "https://github.com/ThatGuyThimo/solproject#readme",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "hardhat": "^2.18.0"
+  }
+}
