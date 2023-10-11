@@ -6,8 +6,8 @@ import "hardhat/console.sol";
 
 contract Token {
     // String identifyers.
-    string public name = "MyToken";
-    string public symbol = "MT";
+    string public tokenName = "MyToken";
+    string public tokenSymbol = "MTN";
 
     // Total token supply.
     uint256 public totalSupply = 1000000;
@@ -29,6 +29,18 @@ contract Token {
         // The totalSupply is assigned to the transaction sender, which is the account that is deploying the contract.
         balances[msg.sender] = totalSupply;
         owner = msg.sender;
+    }
+
+    function name() public view returns(string memory) {
+        return tokenName;
+    }
+
+    function symbol() public view returns(string memory) {
+        return tokenSymbol;
+    }
+
+    function decimals() public pure returns(uint8) {
+        return 18;
     }
 
     /**
