@@ -117,4 +117,115 @@ describe("Token contract", function () {
       );
     });
   });
+
+  describe("Transactions from", function () {
+    it("Should transfer tokens between accounts", async function () {
+      const { hardhatToken, owner, addr1, addr2 } = await loadFixture(
+        deployTokenFixture
+      );
+
+      // await expect (
+      //   hardhatToken.allowance(owner.address, addr2.address)
+      // ).to.equal(0);
+
+      await expect(
+        hardhatToken.connect(owner).aprove(addr2.address, 50)
+      ).to.emit(hardhatToken, "Aproval")
+      .withArgs(owner.address, addr2.address, 50);
+
+      // Transfer 50 tokens from owner to addr1
+      await expect(
+        hardhatToken.connect(addr2).transferFrom(owner.address, addr1.address, 50)
+      ).to.changeTokenBalances(hardhatToken, [owner, addr1], [-50, 50]);
+    });
+
+    it("Should emit Transfer events", async function () {
+      const { hardhatToken, owner, addr1, addr2 } = await loadFixture(
+        deployTokenFixture
+      );
+
+      // Transfer 50 tokens from owner to addr1
+      await expect(hardhatToken.transferFrom(owner.address, addr1.address, 50))
+        .to.emit(hardhatToken, "Transfer")
+        .withArgs(owner.address, addr1.address, 50);
+    });
+
+    it("Should fail if owner doesn't have enough tokens", async function () {
+      const { hardhatToken, owner, addr1 } = await loadFixture(
+        deployTokenFixture
+      );
+      const initialOwnerBalance = await hardhatToken.balanceOf(owner.address);
+
+      // Try to send 1 token from addr1 (0 tokens) to owner.
+      // `require` will evaluate false and revert the transaction.
+
+      await expect(
+        hardhatToken.connect(addr1).aprove(owner.address, 1)
+      ).to.emit(hardhatToken, "Aproval")
+      .withArgs(addr1.address, owner.address, 1);
+
+      await expect(
+        hardhatToken.transferFrom(addr1.address, owner.address, 1)
+      ).to.be.revertedWith("insufficient tokens");
+
+      // Owner balance shouldn't have changed.
+      expect(await hardhatToken.balanceOf(owner.address)).to.equal(
+        initialOwnerBalance
+      );
+    });
+  });
+
+  // describe("Transaction aprove", function () {
+  //   it("Should transfer tokens between accounts", async function () {
+  //     const { hardhatToken, owner, addr1, addr2 } = await loadFixture(
+  //       deployTokenFixture
+  //     );
+  //     // Transfer 50 tokens from owner to addr1
+
+  //     it("Should be 0 before aproval", async function() {        
+  //       expect (
+  //         hardhatToken.allowance(owner.address, addr1.address)
+  //       ).to.equal(0);
+  //     })
+
+  //     await expect(
+  //       hardhatToken.connect(owner).aprove(owner.address, addr1.address, 50)
+  //     ).to.emit(hardhatToken, "Aproval")
+  //     .withArgs(owner.address, addr1.address, 50);
+
+  //     expect (
+  //       hardhatToken.allowance(owner.address, addr1.address)
+  //     ).to.equal(0);
+  //   });
+
+  //   it("Should emit Aproval events", async function () {
+  //     const { hardhatToken, owner, addr1, addr2 } = await loadFixture(
+  //       deployTokenFixture
+  //     );
+
+  //     // Transfer 50 tokens from owner to addr1
+  //     await expect(hardhatToken.transferFrom(owner.address, addr1.address, 50))
+  //       .to.emit(hardhatToken, "Transfer")
+  //       .withArgs(owner.address, addr1.address, 50);
+  //   });
+
+  //   it("Should fail if owner doesn't have enough tokens", async function () {
+  //     const { hardhatToken, owner, addr1 } = await loadFixture(
+  //       deployTokenFixture
+  //     );
+  //     const initialOwnerBalance = await hardhatToken.balanceOf(owner.address);
+
+  //     // Try to send 1 token from addr1 (0 tokens) to owner.
+  //     // `require` will evaluate false and revert the transaction.
+  //     await expect(
+  //       hardhatToken.transferFrom(addr1.address, owner.address, 1)
+  //     ).to.be.revertedWith("insufficient tokens");
+
+  //     // Owner balance shouldn't have changed.
+  //     expect(await hardhatToken.balanceOf(owner.address)).to.equal(
+  //       initialOwnerBalance
+  //     );
+  //   });
+  // });
+
 });

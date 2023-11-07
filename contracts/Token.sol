@@ -77,7 +77,24 @@ contract Token is IERC20 {
 
     }
 
-    function approve(address spender, uint256 amount) public virtual override returns (bool) {
+    function _transfer(address from, address to, uint256 amount) internal virtual {
+        require(_balances[from] >= amount, "insufficient tokens");
+
+        require(msg.sender != address(0), "ERC20: transfer from the zero address");
+        require(to != address(0), "ERC20: transfer to the zero address");
+
+        //transfer the amount.
+        (fromPassed, _balances[from]) = Math.trySub(_balances[from], amount);
+        (toPassed, _balances[to]) = Math.tryAdd(_balances[to], amount);
+
+        require(fromPassed == true);
+        require(toPassed == true);
+
+        // Notify offchain applications of the transfer.
+        emit Transfer(from, to, amount);
+    }
+
+    function approve(address spender, uint256 amount) external returns (bool) {
         _approve(msg.sender, spender, amount);
 
         return true;
@@ -96,22 +113,8 @@ contract Token is IERC20 {
      * The `external` modifier makes a function *only* callable from *outside* the contract.
      */
     function transfer(address to, uint256 amount) external returns(bool){
-        // Check if the transaction sender has enough tokens.
-        // If the `require's` first argument resolves to false then the transaction will be reverted.
-        require(_balances[msg.sender] >= amount, "insufficient tokens");
+        _transfer(msg.sender, to, amount);
 
-        require(msg.sender != address(0), "ERC20: transfer from the zero address");
-        require(to != address(0), "ERC20: transfer to the zero address");
-
-        //transfer the amount.
-        (fromPassed, _balances[msg.sender]) = Math.trySub(_balances[msg.sender], amount);
-        (toPassed, _balances[to]) = Math.tryAdd(_balances[to], amount);
-
-        require(fromPassed == true);
-        require(toPassed == true);
-
-        // Notify offchain applications of the transfer.
-        emit Transfer(msg.sender, to, amount);
         return true;
     }
 
@@ -119,22 +122,9 @@ contract Token is IERC20 {
      * A function to transfer tokens from an address to an address.
      */
     function transferFrom(address from, address to, uint256 amount) external returns (bool) {
-        // Check if the transaction sender has enough tokens.
-        // If the `require's` first argument resolves to false then the transaction will be reverted.
-        require(_balances[from] >= amount, "insufficient tokens");
+        require(allowance(from, msg.sender) <= amount);
+        _transfer(from, to, amount);
 
-        require(from != address(0), "ERC20: transfer from the zero address");
-        require(to != address(0), "ERC20: transfer to the zero address");
-
-        //transfer the amount.
-        (fromPassed, _balances[from]) = Math.trySub(_balances[from], amount);
-        (toPassed, _balances[to]) = Math.tryAdd(_balances[to], amount);
-
-        require(fromPassed == true);
-        require(toPassed == true);
-
-        // Notify offchain applications of the transfer.
-        emit Transfer(from, to, amount);
         return true;
     }
 
